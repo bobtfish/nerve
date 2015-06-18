@@ -5,6 +5,9 @@
   "zk_hosts": ["localhost:2181"],
   "zk_path": "/nerve/services/your_http_service/services",
   "check_interval": 2,
+  "extra": {
+    "weight": 2
+  },
   "checks": [
     {
       "type": "http",

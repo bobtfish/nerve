@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'nerve/reporter/zookeeper'
 
 describe Nerve::Reporter do
   let(:subject) { {
@@ -30,13 +31,30 @@ end
 
 describe Nerve::Reporter::Test do
   let(:subject) {Nerve::Reporter::Test.new({}) }
-  it 'has parse data method that passes strings' do
-    expect(subject.send(:parse_data, 'foobar')).to eql('foobar')
+  context 'parse_data method' do
+    it 'has parse data method that passes strings' do
+      expect(subject.send(:parse_data, 'foobar')).to eql('foobar')
+    end
+    it 'jsonifies anything that is not a string' do
+      thing_to_parse = double()
+      expect(thing_to_parse).to receive(:to_json).and_return('{"some":"json"}')
+      expect(subject.send(:parse_data, thing_to_parse)).to eql('{"some":"json"}')
+    end
   end
-  it 'jsonifies anything that is not a string' do
-    thing_to_parse = double()
-    expect(thing_to_parse).to receive(:to_json).and_return('{"some":"json"}')
-    expect(subject.send(:parse_data, thing_to_parse)).to eql('{"some":"json"}')
+
+  context 'get_service_data method' do
+    it 'throws on missing arguments' do
+      expect { subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666}) }.to raise_error(ArgumentError)
+      expect { subject.get_service_data({'host' => '127.0.0.1', 'instance_id' => 'foobar'}) }.to raise_error(ArgumentError)
+      expect { subject.get_service_data({'port' => 6666, 'instance_id' => 'foobar'}) }.to raise_error(ArgumentError)
+      expect { subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar'}) }.not_to raise_error
+    end
+    it 'takes extra data if present' do
+      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar', 'extra' => {'foo' => 'bar'}})['extra']).to eql({'foo' => 'bar'})
+    end
+    it 'defaults extra data if not present' do
+      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar'})['extra']).to eql({})
+    end
   end
 end
 
