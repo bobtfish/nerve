@@ -49,11 +49,14 @@ describe Nerve::Reporter::Test do
       expect { subject.get_service_data({'port' => 6666, 'instance_id' => 'foobar'}) }.to raise_error(ArgumentError)
       expect { subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar'}) }.not_to raise_error
     end
-    it 'takes extra data if present' do
-      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar', 'extra' => {'foo' => 'bar'}})['extra']).to eql({'foo' => 'bar'})
+    it 'takes weight if present' do
+      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar', 'weight' => 3})['weight']).to eql(3)
     end
-    it 'defaults extra data if not present' do
-      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar'})['extra']).to eql({})
+    it 'skips weight if not present' do
+      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar'})['weight']).to eql(nil)
+    end
+    it 'skips weight if non integer' do
+      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar', 'weight' => 'hello'})['weight']).to eql(nil)
     end
   end
 end

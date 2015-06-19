@@ -29,7 +29,11 @@ class Nerve::Reporter
       %w{instance_id host port}.each do |required|
         raise ArgumentError, "missing required argument #{required} for new service watcher" unless service[required]
       end
-      {'host' => service['host'], 'port' => service['port'], 'name' => service['instance_id'], 'extra' => (service['extra'] || {})}
+      d = {'host' => service['host'], 'port' => service['port'], 'name' => service['instance_id']}
+      if service['weight'].to_i > 0
+        d['weight'] = service['weight'].to_i
+      end
+      d
     end
 
     protected
