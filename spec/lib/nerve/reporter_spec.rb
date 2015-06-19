@@ -49,14 +49,23 @@ describe Nerve::Reporter::Test do
       expect { subject.get_service_data({'port' => 6666, 'instance_id' => 'foobar'}) }.to raise_error(ArgumentError)
       expect { subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar'}) }.not_to raise_error
     end
-    it 'takes weight if present' do
+    it 'takes weight if present and +ve integer' do
       expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar', 'weight' => 3})['weight']).to eql(3)
+    end
+    it 'takes weight if present and 0' do
+      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar', 'weight' => 0})['weight']).to eql(0)
     end
     it 'skips weight if not present' do
       expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar'})['weight']).to eql(nil)
     end
     it 'skips weight if non integer' do
       expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar', 'weight' => 'hello'})['weight']).to eql(nil)
+    end
+    it 'skips weight if a negative integer' do
+      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar', 'weight' => -1})['weight']).to eql(nil)
+    end
+    it 'works if the weight is a string' do
+      expect(subject.get_service_data({'host' => '127.0.0.1', 'port' => 6666, 'instance_id' => 'foobar', 'weight' => '3'})['weight']).to eql(3)
     end
   end
 end
